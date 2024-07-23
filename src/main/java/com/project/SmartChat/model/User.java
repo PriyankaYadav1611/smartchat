@@ -19,21 +19,11 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private String password;
 
-    // Implement UserDetails methods
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return null; // Return roles or authorities if you have them
+        return null; 
     }
 
-    @Override
-    public String getPassword() {
-        return password;
-    }
-
-    @Override
-    public String getUsername() {
-        return username;
-    }
 
     @Override
     public boolean isAccountNonExpired() {
@@ -55,7 +45,7 @@ public class User implements UserDetails {
         return true;
     }
 
-    // Getters and Setters for id, username, and password
+    // Getters and Setters
     public Long getId() {
         return id;
     }
@@ -64,10 +54,20 @@ public class User implements UserDetails {
         this.id = id;
     }
 
+    @Override
+    public String getUsername() {
+        return username;
+    }
+
     public void setUsername(String username) {
         this.username = username;
     }
 
+    @Override
+    public String getPassword() {
+        return password;
+    }
+    
     public void setPassword(String password) {
         this.password = password;
     }
