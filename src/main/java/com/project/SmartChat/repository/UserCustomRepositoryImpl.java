@@ -6,8 +6,10 @@ import com.project.SmartChat.model.User;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.TypedQuery;
 import javax.transaction.Transactional;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 @Transactional
@@ -37,9 +39,17 @@ public class UserCustomRepositoryImpl implements UserCustomRepository {
     }
 
     @Override
-    public List<User> getAllUsers(){
+    public List<User> getAllUsers() {
 
         List<User> users = entityManager.createQuery("SELECT u FROM User u", User.class).getResultList();
         return users;
+    }
+
+    @Override
+    public Optional<User> findById(Long id) {
+        TypedQuery<User> typedQuery = entityManager
+                .createQuery("SELECT u FROM User u WHERE u.id = :id", User.class)
+                .setParameter("id", id);
+        return typedQuery.getResultList().stream().findFirst();
     }
 }

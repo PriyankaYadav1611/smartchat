@@ -12,6 +12,7 @@ import com.project.SmartChat.model.User;
 import com.project.SmartChat.service.UserService;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/users")
@@ -29,6 +30,31 @@ public class UserController {
         return ResponseEntity.ok(users);
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody User user){
+        // check if logged in user can only update itself, it shouldn't be allowed to update others
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        // Get LoggedIn user's name
+        String loggedInUserName = authentication.getName();
+
+        // check if loggedInUserName is same as id's userName
+        User loggedInUser = userService.findByUsername(loggedInUserName);
+        if (!loggedInUser.getId().equals(id)) {
+            // Logged in user is requestig update for other user id
+            return ResponseEntity.status(403).build();
+        }
+        
+        // Logged in user is requesting update for self
+        Optional<User> updatedUser = userService.updateUser(id, user);
+        return updatedUser.map((u) -> ResponseEntity.ok(u))
+        .orElseGet(() -> ResponseEntity.notFound().build());
+        // if (updatedUser.isEmpty()) {
+        //     return  ResponseEntity.notFound().build();
+        // }
+        // return ResponseEntity.ok(updatedUser.get());
+    }
+
     @PostMapping("/auth/register")
     public ResponseEntity<?> register(@RequestBody User user) {
         return ResponseEntity.ok(userService.register(user));
@@ -43,7 +69,7 @@ public class UserController {
         return ResponseEntity.ok("User logged in successfully");
     }
 
-    @PostMapping("/logout")
+    @PostMapping("/auth/logout")
     public ResponseEntity<?> logout() {
         SecurityContextHolder.clearContext();
         return ResponseEntity.ok("User logged out successfully");

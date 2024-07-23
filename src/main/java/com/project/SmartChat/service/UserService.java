@@ -12,6 +12,7 @@ import com.project.SmartChat.model.User;
 import com.project.SmartChat.repository.UserCustomRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class UserService implements UserDetailsService {
@@ -45,5 +46,13 @@ public class UserService implements UserDetailsService {
     public List<User> getAllUsers(){
         List<User> users = userCustomRepository.getAllUsers();
         return users;
+    }
+
+    public Optional<User> updateUser(Long id, User user) {
+        Optional<User> u = userCustomRepository.findById(id);
+        return u.map((foundUser) -> {
+            foundUser.setUsername(user.getUsername());
+            return userCustomRepository.save(foundUser);
+        });
     }
 }
