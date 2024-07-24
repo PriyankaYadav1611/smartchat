@@ -55,6 +55,19 @@ public class UserController {
         // return ResponseEntity.ok(updatedUser.get());
     }
 
+    @GetMapping("/me")
+    public ResponseEntity<User> getMe(){
+        //get logged in UserName through Authentication
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        // get user details for the logged in userName
+        String loggedInUserName = authentication.getName();
+        
+        // Find By UserName
+        User loggedInUser = userService.findByUsername(loggedInUserName);
+        return ResponseEntity.ok(loggedInUser);
+    }
+
     @PostMapping("/auth/register")
     public ResponseEntity<?> register(@RequestBody User user) {
         return ResponseEntity.ok(userService.register(user));
