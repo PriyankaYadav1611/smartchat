@@ -55,4 +55,19 @@ public class UserService implements UserDetailsService {
             return userCustomRepository.save(foundUser);
         });
     }
+
+    public Optional<User> deleteByUserName(String username) {
+        User user = userCustomRepository.findByUsername(username);
+        if(user == null){
+            return Optional.empty();
+        }
+
+        int deletedRowsCount = userCustomRepository.deleteByUserName(user.getUsername());
+        if(deletedRowsCount>0){
+            return Optional.ofNullable(user);
+        }
+        else{
+            return Optional.empty();
+        }
+    }
 }

@@ -57,15 +57,32 @@ public class UserController {
 
     @GetMapping("/me")
     public ResponseEntity<User> getMe(){
-        //get logged in UserName through Authentication
+        // Get logged in UserName through Authentication
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        // get user details for the logged in userName
+        // Get user details for the logged in userName
         String loggedInUserName = authentication.getName();
         
         // Find By UserName
         User loggedInUser = userService.findByUsername(loggedInUserName);
         return ResponseEntity.ok(loggedInUser);
+    }
+
+    @DeleteMapping("/me")
+    public ResponseEntity<User> removeUser() {
+        // Get authentication principle
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        // Get Looged in userName from authentication object
+        String loggedInUserName = authentication.getName();
+
+        // Delete loggedInUser from DB
+        Optional<User> deletedUser = userService.deleteByUserName(loggedInUserName);
+        User delUser = deletedUser.orElseGet(()-> null);
+        if (delUser == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(delUser);
     }
 
     @PostMapping("/auth/register")

@@ -10,4 +10,5 @@ public interface UserCustomRepository {
     User save(User user);
     List<User> getAllUsers();
     Optional<User> findById(Long id);
+    int deleteByUserName(String username);
 }
