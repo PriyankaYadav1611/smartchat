@@ -19,15 +19,15 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .authorizeRequests()
-                .antMatchers("/api/users/auth/register", "/api/users/auth/login", "/ws/**").permitAll()
-                .anyRequest().authenticated()
+            .antMatchers("/api/users/auth/register", "/api/users/auth/login", "/ws/**").permitAll()
+            .anyRequest().authenticated()
             .and()
             .csrf().disable()
             .formLogin().disable()
             .logout().permitAll()
             .and()
             .sessionManagement()
-                .maximumSessions(1);
+            .maximumSessions(1);
 
         return http.build();
     }
