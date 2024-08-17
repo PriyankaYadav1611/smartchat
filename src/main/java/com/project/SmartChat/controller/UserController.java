@@ -1,18 +1,29 @@
 package com.project.SmartChat.controller;
 
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
+import com.project.SmartChat.model.JwtResponse;
 import com.project.SmartChat.model.User;
+import com.project.SmartChat.service.JwtService;
 import com.project.SmartChat.service.UserService;
-
-import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/users")
@@ -23,6 +34,12 @@ public class UserController {
 
     @Autowired
     private AuthenticationManager authenticationManager;
+
+    @Autowired
+    private UserDetailsService userDetailsService;
+
+    @Autowired
+    private JwtService jwtService;
 
     @GetMapping("")
     public ResponseEntity<List<User>> getAllUsers(){
@@ -91,12 +108,16 @@ public class UserController {
     }
 
     @PostMapping("/auth/login")
-    public ResponseEntity<?> login(@RequestBody User user) {
+    public ResponseEntity<JwtResponse> login(@RequestBody User user) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword())
         );
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        return ResponseEntity.ok("User logged in successfully");
+        UserDetails userDetails = userDetailsService.loadUserByUsername(user.getUsername());
+        String jwt = jwtService.generateToken(userDetails);
+
+        return ResponseEntity.ok(new JwtResponse(jwt));        
+        // return ResponseEntity.ok("User logged in successfully");
     }
 
     @PostMapping("/auth/logout")
