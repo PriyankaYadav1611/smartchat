@@ -2,6 +2,7 @@ package com.project.SmartChat.config;
 
 
 import java.io.IOException;
+import java.util.Enumeration;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -32,9 +33,18 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
+        Enumeration<String> headerNames = request.getHeaderNames();
 
+        if (headerNames != null) {
+            while (headerNames.hasMoreElements()) {
+                String headerName = headerNames.nextElement();
+                System.out.println(headerName + ": " + request.getHeader(headerName));
+            }
+        }        
         final String requestTokenHeader = request.getHeader("Authorization");
         System.out.println("Header: " + requestTokenHeader);
+        System.out.println("HeaderTest: " + request.getHeader("Auth"));
+
 
         String username = null;
         String jwtToken = null;
@@ -57,16 +67,23 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                         usernamePasswordAuthenticationToken
                             .setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                         SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken); 
+                    } else {
+                        System.out.println("securityContextHolder is already set");
                     }
                 }
             } catch (IllegalArgumentException e) {
                 System.out.println("Invalid token, IlleggalArg e: " + e);
+                // return;
             } catch (Exception e) {
+                
                 System.out.println("Invalid token, Exception e: " + e);
+                // return;
             }
             
         } else {
+            System.out.println("JWT Token not exist");
             logger.warn("JWT Token does not begin with Bearer String");
+            // return;
         }
         chain.doFilter(request, response);
     }

@@ -25,20 +25,36 @@ public class SecurityConfig {
         this.userDetailsService = userDetailsService;
     }
 
+    // @Bean
+    // public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    //     http
+    //         .authorizeRequests()
+    //         .antMatchers("/api/users/auth/register", "/api/users/auth/login", "/ws/**").permitAll()
+    //         .anyRequest().authenticated()
+    //         .and()
+    //         .csrf().disable()
+    //         .formLogin().disable()
+    //         .logout().permitAll()
+    //         .and()
+    //         .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+        
+    //     http.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
+    //     return http.build();
+    // }
+
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            .authorizeRequests()
+        .csrf().disable()
+        .authorizeRequests()
             .antMatchers("/api/users/auth/register", "/api/users/auth/login", "/ws/**").permitAll()
-            .anyRequest().authenticated()
-            .and()
-            .csrf().disable()
-            .formLogin().disable()
-            .logout().permitAll()
+            // .anyRequest().authenticated()
             .and()
             .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+            
+            System.out.println("Adding JwtRequestFilter before UsernamePasswordAuthenticationFilter");
 
-        http.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
+            http.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 

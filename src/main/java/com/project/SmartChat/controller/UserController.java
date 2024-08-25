@@ -79,9 +79,11 @@ public class UserController {
 
         // Get user details for the logged in userName
         String loggedInUserName = authentication.getName();
+        System.out.println("getMe: auth.getName: " + loggedInUserName);
         
         // Find By UserName
         User loggedInUser = userService.findByUsername(loggedInUserName);
+        System.out.println("LoggedIn User: " + loggedInUser);
         return ResponseEntity.ok(loggedInUser);
     }
 
