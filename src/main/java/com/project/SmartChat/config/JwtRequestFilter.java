@@ -9,6 +9,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -18,6 +19,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.project.SmartChat.service.JwtService;
+
+import io.jsonwebtoken.ExpiredJwtException;
 
 @Component
 public class JwtRequestFilter extends OncePerRequestFilter {
@@ -33,6 +36,8 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
+
+        // Log all headers
         Enumeration<String> headerNames = request.getHeaderNames();
 
         if (headerNames != null) {
@@ -44,6 +49,15 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         final String requestTokenHeader = request.getHeader("Authorization");
         System.out.println("Header: " + requestTokenHeader);
         System.out.println("HeaderTest: " + request.getHeader("Auth"));
+
+        // Skip specific URLs from checking token
+        String requestURI = request.getRequestURI();
+        if (requestURI.startsWith("/api/users/auth/register") ||
+            requestURI.startsWith("/api/users/auth/login") ||
+            requestURI.startsWith("/ws/")) {
+            chain.doFilter(request, response);
+            return;
+        }
 
 
         String username = null;
@@ -73,17 +87,26 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                 }
             } catch (IllegalArgumentException e) {
                 System.out.println("Invalid token, IlleggalArg e: " + e);
-                // return;
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.getWriter().write("JWT Token is invalid!");
+                return;
+            } catch (ExpiredJwtException e) {
+                System.out.println("Expired token, e: " + e);
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.getWriter().write("JWT Token has expired, please regenerate it!");
+                return;
             } catch (Exception e) {
-                
                 System.out.println("Invalid token, Exception e: " + e);
-                // return;
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.getWriter().write("JWT Token is invalid");
+                return;
             }
             
         } else {
             System.out.println("JWT Token not exist");
-            logger.warn("JWT Token does not begin with Bearer String");
-            // return;
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.getWriter().write("JWT Token doesn't exist!");
+            return;
         }
         chain.doFilter(request, response);
     }
