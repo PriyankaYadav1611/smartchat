@@ -12,12 +12,14 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.Table;
 
 import org.springframework.data.annotation.CreatedDate;
 
 import com.project.SmartChat.enums.GroupType;
 
 @Entity
+@Table(name = "`group`")
 public class Group {
     
     @Id
@@ -25,13 +27,14 @@ public class Group {
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "title")
+    @Column(name = "title", nullable = false)
     private String title;
 
     @Column(name = "description")
     private String description;
 
     @CreatedDate
+    @Column(name = "created_date", nullable = false, updatable = false)
     private Date createdDate;
 
     @ManyToOne(fetch = FetchType.LAZY)

@@ -70,4 +70,8 @@ public class UserService implements UserDetailsService {
             return Optional.empty();
         }
     }
+
+    public Optional<User> findByUserId(Long id) {
+        return userCustomRepository.findById(id);
+    } 
 }
