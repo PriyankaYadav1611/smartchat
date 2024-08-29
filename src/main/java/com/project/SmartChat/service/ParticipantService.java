@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import com.project.SmartChat.model.Group;
 import com.project.SmartChat.model.Participant;
+import com.project.SmartChat.model.ParticipantId;
 import com.project.SmartChat.model.User;
 import com.project.SmartChat.repository.GroupRepository;
 import com.project.SmartChat.repository.ParticipantRepository;
@@ -50,7 +51,11 @@ public class ParticipantService {
         return participantRepository.findGroupsWithExactParticipants(participantUserIds);
     }
 
-    public void deleteParticipantById(Long participantId) {
+    public boolean isUserIdParticipantOfGroupId(Long userId, Long groupId) {
+        return participantRepository.isUserIdParticipantOfGroupId(userId, groupId);
+    }
+
+    public void deleteParticipantById(ParticipantId participantId) {
         Participant participant = participantRepository.findById(participantId);
         if (participant != null) {
             participantRepository.delete(participant);
