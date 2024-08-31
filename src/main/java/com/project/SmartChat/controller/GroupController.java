@@ -15,9 +15,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.project.SmartChat.model.Group;
+import com.project.SmartChat.model.Participant;
 import com.project.SmartChat.model.User;
 import com.project.SmartChat.model.dto.GroupDTO;
 import com.project.SmartChat.service.GroupService;
+import com.project.SmartChat.service.ParticipantService;
 import com.project.SmartChat.service.UserService;
 
 
@@ -31,8 +33,11 @@ public class GroupController {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private ParticipantService participantService;
+
     @PostMapping("")
-    public ResponseEntity<Group> createGroup(@RequestBody GroupDTO groupDTO) {
+    public ResponseEntity<GroupDTO> createGroup(@RequestBody GroupDTO groupDTO) {
          // Find the User by ID
         User user = userService.findByUserId(groupDTO.getCreatedById())
         .orElseThrow(() -> new RuntimeException("User not found"));
@@ -43,12 +48,25 @@ public class GroupController {
         group.setCreatedDate(new java.sql.Date(System.currentTimeMillis()));
         group.setCreatedBy(user);
         group.setType(groupDTO.getType());
-        
+    
         // Save the Group
         Group savedGroup = groupService.createGroup(group);
+        Long savedGroupId = savedGroup.getId();
 
+        List<Long> userIds = groupDTO.getGroupMembers();
+
+        // Adding participants and group mapping in participant table
+        List<Participant> participants = participantService.addParticipants(savedGroupId, userIds);
+
+        GroupDTO savedGroupDTO = new GroupDTO();
+        savedGroupDTO.setId(savedGroupId);
+        savedGroupDTO.setTitle(savedGroup.getTitle());
+        savedGroupDTO.setDescription(savedGroup.getDescription());
+        savedGroupDTO.setType(savedGroup.getType());
+        savedGroupDTO.setCreatedById(savedGroup.getCreatedBy().getId());
+        savedGroupDTO.setGroupMembers(userIds);
         // Return the created Group
-        return ResponseEntity.ok(savedGroup);
+        return ResponseEntity.ok(savedGroupDTO);
     }
 
     // Get a Group by ID

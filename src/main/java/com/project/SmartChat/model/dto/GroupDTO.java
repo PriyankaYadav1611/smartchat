@@ -1,30 +1,31 @@
 package com.project.SmartChat.model.dto;
 import java.sql.Date;
+import java.util.List;
 
 import com.project.SmartChat.enums.GroupType;
 
+
 public class GroupDTO {
-
-
-    
     private Long id;
     private String title;
     private String description;
     private Date createdDate;
     private Long createdById;  // Represents the ID of the User who created the group
     private GroupType type;
+    private List<Long> groupMembers;
 
     // Default constructor
     public GroupDTO() {
     }
 
     // Parameterized constructor
-    public GroupDTO(String title, String description, Date createdDate, Long createdById, GroupType type) {
+    public GroupDTO(String title, String description, Date createdDate, Long createdById, GroupType type, List<Long> groupMembers) {
         this.title = title;
         this.description = description;
         this.createdDate = createdDate;
         this.createdById = createdById;
         this.type = type;
+        this.groupMembers = groupMembers;
     }
 
     // Getters and Setters
@@ -74,5 +75,13 @@ public class GroupDTO {
 
     public void setType(GroupType type) {
         this.type = type;
+    }
+
+    public void setGroupMembers(List<Long> groupMembers) {
+        this.groupMembers = groupMembers;
+    }
+
+    public List<Long> getGroupMembers() {
+        return groupMembers;
     }
 }

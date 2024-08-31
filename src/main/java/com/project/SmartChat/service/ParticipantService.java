@@ -1,7 +1,8 @@
 package com.project.SmartChat.service;
 
 import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,6 +14,7 @@ import com.project.SmartChat.model.User;
 import com.project.SmartChat.repository.GroupRepository;
 import com.project.SmartChat.repository.ParticipantRepository;
 import com.project.SmartChat.repository.UserCustomRepository;
+
 
 @Service
 public class ParticipantService {
@@ -26,25 +28,40 @@ public class ParticipantService {
     @Autowired
     private ParticipantRepository participantRepository;
 
+    @Autowired
+    private GroupService groupService;
 
-    public Participant addParticipant(Long groupId, Long userId) {
-        Group group = groupRepository.findById(groupId);
-        if (group == null) {
-            throw new RuntimeException("Group not found");
-        }
-        try {
-            User user = userCustomRepository.findById(userId).get();
+    @Autowired
+    private UserService userService;
+
+
+    public List<Participant> addParticipants(Long groupId, List<Long> userIds) {
+    
+        // Get All groups
+        Group group = groupService.getGroupById(groupId);
+    
+        // create User list
+        List<User> users = userIds.stream().map(userId -> {
+            Optional<User> optionalUser = userService.findByUserId(userId);
+
+            return optionalUser.map((u) -> u).orElseGet(() -> null);
+            // TODO: null return case to be handled properly by calling function or this function.
+
+        }).collect(Collectors.toList());
+
+
+        List<Participant> participants = users.stream().map(user -> {
             Participant participant = new Participant(group, user);
-            return participantRepository.save(participant);
-        } catch (NoSuchElementException e) {
-            System.out.println("The user you want to add as participant doesn't exist\nexception.." + e);
-        }
+            return participant;
 
-        return null;
+        }).collect(Collectors.toList());
+
+        participantRepository.saveAll(participants);
+        return participants;
     }
-
-    public List<Participant> getParticipantsByGroupId(Long groupId) {
-        return participantRepository.findByGroupId(groupId);
+ 
+    public List<User> getUsersByGroupId(Long groupId) {
+        return participantRepository.getUsersByGroupId(groupId);
     }
 
     public List<Group> findGroupsWithExactParticipants(List<Long> participantUserIds) {
@@ -61,4 +78,9 @@ public class ParticipantService {
             participantRepository.delete(participant);
         }
     }
+
+    public List<Group> getAllGroupsWithUserId(Long userId) {
+        return participantRepository.getAllGroupsWithUserId(userId);
+    }
+
 }

@@ -2,6 +2,7 @@ package com.project.SmartChat.controller;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -20,10 +21,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.project.SmartChat.model.Group;
 import com.project.SmartChat.model.JwtResponse;
 import com.project.SmartChat.model.User;
+import com.project.SmartChat.model.dto.GroupDTO;
 import com.project.SmartChat.service.JwtService;
 import com.project.SmartChat.service.UserService;
+import com.project.SmartChat.service.ParticipantService;
+
 
 @RestController
 @RequestMapping("/api/users")
@@ -40,6 +45,9 @@ public class UserController {
 
     @Autowired
     private JwtService jwtService;
+
+    @Autowired
+    private ParticipantService participantService;
 
     @GetMapping("")
     public ResponseEntity<List<User>> getAllUsers(){
@@ -127,4 +135,44 @@ public class UserController {
         SecurityContextHolder.clearContext();
         return ResponseEntity.ok("User logged out successfully");
     }
+
+    @GetMapping("/groups")
+    public List<GroupDTO> getAllGroupswithLoggedInUser() {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        // Get Looged in userName from authentication object
+        String loggedInUserName = authentication.getName();
+
+        User loggedInUser = userService.findByUsername(loggedInUserName);
+        
+        // By loggedin userId, participant service will return list of participant's object
+        List<Group> groups = participantService.getAllGroupsWithUserId(loggedInUser.getId());
+
+        // Now, create GroupDTO to return
+        List<GroupDTO> groupDTOs = groups.stream().map(group -> {
+            // Need groupmember and groupmember is property in groupDTO, so, call participant service 
+            List<User> users =  participantService.getUsersByGroupId(group.getId());
+
+            // Covert Participant list type to Long 
+            List<Long> membersOfGroup = users.stream().map(user -> {
+                return user.getId();
+            }).collect(Collectors.toList());
+
+            GroupDTO groupDto = new GroupDTO();
+            groupDto.setId(group.getId());
+            groupDto.setTitle(group.getTitle());
+            groupDto.setDescription(group.getDescription());
+            groupDto.setCreatedById(group.getCreatedBy().getId());
+            groupDto.setCreatedDate(group.getcreatedDate());
+            groupDto.setType(group.getType());
+
+            // pass list of membersofGroup
+            groupDto.setGroupMembers(membersOfGroup);
+            return groupDto;
+        }).collect(Collectors.toList());
+
+        return groupDTOs;
+    }
 }
+

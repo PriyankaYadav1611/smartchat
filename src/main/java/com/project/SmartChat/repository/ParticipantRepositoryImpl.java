@@ -12,6 +12,7 @@ import org.springframework.stereotype.Repository;
 import com.project.SmartChat.model.Group;
 import com.project.SmartChat.model.Participant;
 import com.project.SmartChat.model.ParticipantId;
+import com.project.SmartChat.model.User;
 
 @Repository
 @Transactional
@@ -31,8 +32,31 @@ public class ParticipantRepositoryImpl implements ParticipantRepository {
     }
 
     @Override
-    public List<Participant> findByGroupId(Long groupId) {
-        return entityManager.createQuery("SELECT p FROM Participant p WHERE p.group.id = :groupId", Participant.class)
+    public void saveAll(List<Participant> participants) {
+        for (int i = 0; i < participants.size(); i++) {
+            Group group = entityManager.find(Group.class, participants.get(i).getGroup().getId());
+            User user = entityManager.find(User.class, participants.get(i).getUser().getId());
+
+            // Set the managed entities to the participant
+            participants.get(i).setGroup(group);
+            participants.get(i).setUser(user);
+            
+            entityManager.persist(participants.get(i));
+
+
+            // save in batch of 20
+            if (i % 20 == 0) {
+                entityManager.flush();
+                entityManager.clear();
+            }
+        }
+        entityManager.flush();
+        entityManager.clear();
+    }
+
+    @Override
+    public List<User> getUsersByGroupId(Long groupId) {
+        return entityManager.createQuery("SELECT p.user FROM Participant p WHERE p.group.id = :groupId", User.class)
                             .setParameter("groupId", groupId)
                             .getResultList();
     }
@@ -80,5 +104,14 @@ public class ParticipantRepositoryImpl implements ParticipantRepository {
         } else {
             entityManager.remove(entityManager.merge(participant));
         }
+    }
+
+    @Override
+    public List<Group> getAllGroupsWithUserId(Long userId) {
+        TypedQuery<Group> query = entityManager.createQuery("SELECT p.group FROM Participant p WHERE p.user.id = :userId", Group.class)
+        .setParameter("userId", userId);
+
+        List<Group> groups = query.getResultList();
+        return groups;
     }
 }
