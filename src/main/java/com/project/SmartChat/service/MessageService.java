@@ -22,8 +22,8 @@ public class MessageService {
         return messageRepository.findById(id);
     }
 
-    public List<Message> findByGroupId(Long groupId) {
-        return messageRepository.findByGroupId(groupId);
+    public List<Message> getByGroupId(Long groupId) {
+        return messageRepository.getByGroupId(groupId);
     }
 
     public void delete(Message message) {

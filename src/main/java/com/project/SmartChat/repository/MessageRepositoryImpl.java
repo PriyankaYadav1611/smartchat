@@ -34,7 +34,7 @@ public class MessageRepositoryImpl implements MessageRepository {
     }
 
     @Override
-    public List<Message> findByGroupId(Long groupId) {
+    public List<Message> getByGroupId(Long groupId) {
         return entityManager.createQuery("SELECT m FROM Message m WHERE m.group.id = :groupId", Message.class)
                             .setParameter("groupId", groupId)
                             .getResultList();

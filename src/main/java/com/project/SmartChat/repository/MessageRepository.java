@@ -10,7 +10,7 @@ public interface  MessageRepository {
 
     public Message findById(Long id);
 
-    List<Message> findByGroupId(Long groupId);
+    List<Message> getByGroupId(Long groupId);
 
     public void delete(Message message);
 }
