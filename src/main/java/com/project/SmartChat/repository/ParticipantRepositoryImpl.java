@@ -114,4 +114,14 @@ public class ParticipantRepositoryImpl implements ParticipantRepository {
         List<Group> groups = query.getResultList();
         return groups;
     }
+
+
+    @Override
+    public List<User> getUsersByGroupIds(List<Long> groupIds) {
+        TypedQuery<User> query = entityManager.createQuery(
+            "SELECT DISTINCT p.user FROM Participant p WHERE p.group.id IN :groupIds", User.class)
+            .setParameter("groupIds", groupIds);
+
+        return query.getResultList();
+    }
 }

@@ -5,6 +5,8 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,6 +20,7 @@ import com.project.SmartChat.model.Group;
 import com.project.SmartChat.model.Participant;
 import com.project.SmartChat.model.User;
 import com.project.SmartChat.model.dto.GroupDTO;
+import com.project.SmartChat.model.dto.UserDTO;
 import com.project.SmartChat.service.GroupService;
 import com.project.SmartChat.service.ParticipantService;
 import com.project.SmartChat.service.UserService;
@@ -153,6 +156,39 @@ public class GroupController {
             return ResponseEntity.notFound().build();
         }
        
-    } 
+    }
+
+    // Get all unique users where logged in user is a member
+    @GetMapping("/users")
+    public List<UserDTO> getAllUsersForLoggedInUserGroups() {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        // Get Looged in userName from authentication object
+        String loggedInUserName = authentication.getName();
+
+        User loggedInUser = userService.findByUsername(loggedInUserName);
+        
+        // By loggedin userId, participant service will return list of participant's object
+        List<Group> groups = participantService.getAllGroupsWithUserId(loggedInUser.getId());
+
+        List<Long> groupIds = groups.stream().map(group -> {
+            Long groupId = group.getId();
+            return groupId;
+        }).collect(Collectors.toList());
+
+        List<User> users = participantService.getUsersByGroupIds(groupIds);
+
+        List<UserDTO> userDTOs = users.stream().map(user -> {
+            Long userId = user.getId();
+            String username = user.getUsername();
+            UserDTO userDTO = new UserDTO();
+            userDTO.setId(userId);
+            userDTO.setUsername(username);
+            return userDTO;
+        }).collect(Collectors.toList());
+        
+        return userDTOs;
+    }
 
 }

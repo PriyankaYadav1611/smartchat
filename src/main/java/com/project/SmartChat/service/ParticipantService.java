@@ -83,4 +83,8 @@ public class ParticipantService {
         return participantRepository.getAllGroupsWithUserId(userId);
     }
 
+    public List<User> getUsersByGroupIds(List<Long> groupIds) {
+        return participantRepository.getUsersByGroupIds(groupIds);
+    } 
+
 }

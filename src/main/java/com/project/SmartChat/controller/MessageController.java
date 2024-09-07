@@ -1,5 +1,6 @@
 package com.project.SmartChat.controller;
 
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,16 +12,21 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import com.project.SmartChat.model.Group;
+import com.project.SmartChat.model.Message;
 import com.project.SmartChat.model.User;
 import com.project.SmartChat.model.dto.MessageDTO;
-import com.project.SmartChat.service.ParticipantService;
 import com.project.SmartChat.service.GroupService;
+import com.project.SmartChat.service.MessageService;
+import com.project.SmartChat.service.ParticipantService;
 import com.project.SmartChat.service.UserService;
 
 
 @Controller
 public class MessageController {
     private final SimpMessagingTemplate messagingTemplate;
+
+    @Autowired
+    private MessageService messageService;
 
     @Autowired
     private ParticipantService participantService;
@@ -73,6 +79,16 @@ public class MessageController {
         System.out.println("Content " + messageDto.getContent());
         List<User> groupUsers =  participantService.getUsersByGroupId(sendToGroupId);
 
+        Message message = new Message();
+        message.setSender(sender);
+        message.setGroup(sendToGroup); 
+        message.setContent(content);
+        message.setSentAt(new Date());
+        
+        message = messageService.saveMessage(message);
+        messageDto.setSentAt(message.getSentAt());
+        messageDto.setId(message.getId());
+        
         String destinatioString ="/queue/messages/groups";
         System.out.println("destinatioString: " + destinatioString);
         messagingTemplate.convertAndSendToUser("groupId-" + sendToGroupId, destinatioString, messageDto);

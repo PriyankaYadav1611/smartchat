@@ -1,6 +1,6 @@
 package com.project.SmartChat.model.dto;
 
-import java.sql.Date;
+import java.util.Date;
 
 
 public class MessageDTO {
@@ -11,6 +11,10 @@ public class MessageDTO {
     private String content;
     private Date sentAt;
     private boolean isSeen = false;
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     public Long getId() {
         return id;

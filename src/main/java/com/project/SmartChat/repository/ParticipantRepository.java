@@ -24,4 +24,6 @@ public interface  ParticipantRepository {
     public void delete(Participant participant);
 
     public List<Group> getAllGroupsWithUserId(Long userId);
+
+    public List<User> getUsersByGroupIds(List<Long> groupIds);
 }

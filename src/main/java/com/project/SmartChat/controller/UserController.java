@@ -137,7 +137,7 @@ public class UserController {
     }
 
     @GetMapping("/groups")
-    public List<GroupDTO> getAllGroupswithLoggedInUser() {
+    public List<GroupDTO> getAllGroupsWithLoggedInUser() {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
