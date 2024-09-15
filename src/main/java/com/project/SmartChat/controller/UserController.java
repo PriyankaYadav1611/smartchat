@@ -57,7 +57,7 @@ public class UserController {
 
     @PutMapping("/{id}")
     public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody User user){
-        // check if logged in user can only update itself, it shouldn't be allowed to update others
+        // logged in user can only update itself, it shouldn't be allowed to update others
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         // Get LoggedIn user's name

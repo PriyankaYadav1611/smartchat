@@ -41,9 +41,12 @@ public class GroupController {
 
     @PostMapping("")
     public ResponseEntity<GroupDTO> createGroup(@RequestBody GroupDTO groupDTO) {
-         // Find the User by ID
-        User user = userService.findByUserId(groupDTO.getCreatedById())
-        .orElseThrow(() -> new RuntimeException("User not found"));
+        // Get loggedIn username
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String loggedInUserName = authentication.getName();
+
+        // get loggedIn User
+        User user = userService.findByUsername(loggedInUserName);
         
         Group group = new Group();
         group.setTitle(groupDTO.getTitle());
