@@ -71,7 +71,7 @@ public class ParticipantRepositoryImpl implements ParticipantRepository {
             "AND " +
             "SUM(CASE WHEN p.user.id IN :participantUserIds THEN 1 ELSE 0 END) = :size", 
             Group.class);
-        query.setParameter("size", participantUserIds.size());
+        query.setParameter("size", Long.valueOf(participantUserIds.size()));
         query.setParameter("participantUserIds", participantUserIds);
 
         return query.getResultList();

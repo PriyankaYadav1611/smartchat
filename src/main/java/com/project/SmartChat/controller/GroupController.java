@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.project.SmartChat.enums.GroupType;
 import com.project.SmartChat.model.Group;
 import com.project.SmartChat.model.Participant;
 import com.project.SmartChat.model.User;
@@ -47,6 +48,33 @@ public class GroupController {
 
         // get loggedIn User
         User user = userService.findByUsername(loggedInUserName);
+
+        List<Long> userIds = groupDTO.getGroupMembers();
+        // check if groupMembers is having loggedInUser
+        //    if not: return error
+        if (userIds.contains(user.getId()) == false) {
+            System.out.println("GroupController: CreateGroup: userIds doesn't contain loggedIn userId");
+            return ResponseEntity.badRequest().build();
+        }
+
+        // check if groupType is one to one:
+        //    if it is: check if already one to one type is present for this pair
+        //        if it is: return with error/existing group
+        GroupType groupType = groupDTO.getType();
+        if (groupType == GroupType.ONE_TO_ONE) {
+            if (userIds.size() != 2) {
+                // one to one type must be having only 2 userIds
+                System.out.println("GroupController: CreateGroup: userIds should only be havivng 2 users");
+                return ResponseEntity.badRequest().build();
+            }
+            List<Group> groupsWithExachtParticipants = participantService.findGroupsWithExactParticipants(userIds);
+            if (!groupsWithExachtParticipants.isEmpty()) {
+                // there is already a one to one group is present, no need to create a new one
+                System.out.println("GroupController: CreateGroup: there is already a one to one group");
+                return ResponseEntity.badRequest().build();
+            }
+        }
+
         
         Group group = new Group();
         group.setTitle(groupDTO.getTitle());
@@ -59,7 +87,7 @@ public class GroupController {
         Group savedGroup = groupService.createGroup(group);
         Long savedGroupId = savedGroup.getId();
 
-        List<Long> userIds = groupDTO.getGroupMembers();
+        
 
         // Adding participants and group mapping in participant table
         List<Participant> participants = participantService.addParticipants(savedGroupId, userIds);
