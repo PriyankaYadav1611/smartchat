@@ -7,12 +7,16 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 
 @Component
 public class CorsFilter extends OncePerRequestFilter {
+
+    @Value("${cors.allowed.origins}")
+    private String allowedOrigins;
 
     public CorsFilter() {
     }
@@ -27,7 +31,7 @@ public class CorsFilter extends OncePerRequestFilter {
         HttpServletRequest req = (HttpServletRequest) request;
         HttpServletResponse res = (HttpServletResponse) response;
 
-        res.setHeader("Access-Control-Allow-Origin", "http://localhost:3000");
+        res.setHeader("Access-Control-Allow-Origin", allowedOrigins);
         res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
         res.setHeader("Access-Control-Allow-Headers", "origin, content-type, accept, authorization");
         res.setHeader("Access-Control-Allow-Credentials", "true");
