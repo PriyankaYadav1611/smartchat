@@ -1,1 +1,1 @@
-web: java -jar target/SmartChat.jar
+web: java -jar target/project-1.0.0-SNAPSHOT
